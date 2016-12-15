@@ -901,6 +901,9 @@ static int dwc3_probe(struct platform_device *pdev)
 	hird_threshold = 12;
 
 	dwc->maximum_speed = usb_get_maximum_speed(dev);
+	if (dwc->maximum_speed > USB_SPEED_HIGH)
+		dwc->maximum_speed = USB_SPEED_HIGH;
+
 	dwc->dr_mode = usb_get_dr_mode(dev);
 
 	dwc->has_lpm_erratum = device_property_read_bool(dev,
@@ -950,6 +953,9 @@ static int dwc3_probe(struct platform_device *pdev)
 
 	if (pdata) {
 		dwc->maximum_speed = pdata->maximum_speed;
+		if (dwc->maximum_speed > USB_SPEED_HIGH)
+			dwc->maximum_speed = USB_SPEED_HIGH;
+
 		dwc->has_lpm_erratum = pdata->has_lpm_erratum;
 		if (pdata->lpm_nyet_threshold)
 			lpm_nyet_threshold = pdata->lpm_nyet_threshold;
@@ -1048,7 +1054,7 @@ static int dwc3_probe(struct platform_device *pdev)
 		/* fall through */
 	case USB_SPEED_UNKNOWN:
 		/* default to superspeed */
-		dwc->maximum_speed = USB_SPEED_SUPER;
+		dwc->maximum_speed = USB_SPEED_HIGH;
 
 		/*
 		 * default to superspeed plus if we are capable.
