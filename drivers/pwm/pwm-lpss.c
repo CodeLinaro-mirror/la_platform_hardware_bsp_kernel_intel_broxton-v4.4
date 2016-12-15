@@ -95,6 +95,7 @@ static int pwm_lpss_config(struct pwm_chip *chip, struct pwm_device *pwm,
 	unsigned long c, base_unit_range;
 	unsigned long long base_unit, freq = NSEC_PER_SEC;
 	u32 ctrl;
+	int retry = 100;
 
 	do_div(freq, period_ns);
 
@@ -119,7 +120,12 @@ static int pwm_lpss_config(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	pm_runtime_get_sync(chip->dev);
 
-	ctrl = pwm_lpss_read(pwm);
+	while (((ctrl = pwm_lpss_read(pwm)) & PWM_SW_UPDATE) && retry--)
+		usleep_range(50, 100);
+
+	if (ctrl & PWM_SW_UPDATE)
+		return -EAGAIN;
+
 	ctrl &= ~PWM_ON_TIME_DIV_MASK;
 	ctrl &= ~((base_unit_range - 1) << PWM_BASE_UNIT_SHIFT);
 	base_unit &= (base_unit_range - 1);
