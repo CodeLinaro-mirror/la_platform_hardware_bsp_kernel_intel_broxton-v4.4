@@ -1551,6 +1551,7 @@ void i915_driver_postclose(struct drm_device *dev, struct drm_file *file)
 {
 	struct drm_i915_file_private *file_priv = file->driver_priv;
 
+	kfree(file_priv->process_name);
 	kfree(file_priv);
 }
 
